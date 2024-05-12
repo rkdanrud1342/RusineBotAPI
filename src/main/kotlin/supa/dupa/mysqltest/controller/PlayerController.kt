@@ -22,6 +22,13 @@ class PlayerController {
         @RequestParam(name = "id") id : Long,
         @RequestParam(name = "playerName") name : String
     ) : String {
+        if (playerRepository.findByIdOrNull(id) != null) {
+            return ServiceResult.Fail(
+                code = -1,
+                message = "이미 프로필이 있어요."
+            ).toJsonString()
+        }
+
         val saveResult = playerRepository.save(
             Player(
                 id = id,
