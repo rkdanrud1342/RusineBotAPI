@@ -8,9 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
-import supa.dupa.mysqltest.entities.CasualGame
-import supa.dupa.mysqltest.entities.RankGame
-import supa.dupa.mysqltest.entities.PostResponse
+import supa.dupa.mysqltest.entities.*
 import supa.dupa.mysqltest.repo.CasualGameRepository
 import supa.dupa.mysqltest.repo.RankGameRepository
 import supa.dupa.mysqltest.repo.PlayerRepository
@@ -32,81 +30,143 @@ class GameController {
 
     @PostMapping(path=["/casual/create"])
     @ResponseBody
-    fun registerCasualMatch(
-        @RequestParam player1Id : ULong,
-        @RequestParam player2Id : ULong
-    ) : CasualGame? = casualGameRepository.save(
-        CasualGame(
-            player1Id = "$player1Id",
-            player2Id = "$player2Id",
+    fun createCasualGame(
+        @RequestParam player1Id : Long,
+        @RequestParam player2Id : Long
+    ) : String {
+        val player1 = playerRepository.findByIdOrNull(player1Id)
+            ?: return ServiceResult.Fail(
+                code = -1,
+                message = "p1 정보를 찾을 수 없습니다."
+            ).toJsonString()
+
+        val player2 = playerRepository.findByIdOrNull(player2Id)
+            ?: return ServiceResult.Fail(
+                code = -1,
+                message = "p2 정보를 찾을 수 없습니다."
+            ).toJsonString()
+
+        val game = casualGameRepository.save(
+            CasualGame(
+                player1Id = player1.id,
+                player2Id = player2.id,
+                player1WinCount = player1.casualWinCount,
+                player2WinCount = player2.casualWinCount
+            )
         )
-    )
+
+        return ServiceResult.Success(
+            code = 0,
+            data = game
+        ).toJsonString()
+    }
 
     @PostMapping(path=["/casual/score"])
     @ResponseBody
     fun registerCasualMatchScore(
-        @RequestParam gameId : Int,
+        @RequestParam gameId : Long,
         @RequestParam player1WinCount : Int,
         @RequestParam player2WinCount : Int
-    ) : PostResponse {
+    ) : String {
         casualGameRepository.findByIdOrNull(gameId)?.let { g ->
             g.player1WinCount = player1WinCount
             g.player2WinCount = player2WinCount
 
-
             casualGameRepository.save(g)
-        } ?: return PostResponse(404, "매치를 찾을 수 없습니다.")
+        } ?: return ServiceResult.Fail(
+            code = -1,
+            message = "매치를 찾을 수 없습니다."
+        ).toJsonString()
 
-        return PostResponse(200, "정상 저장되었습니다.")
+        return ServiceResult.Success(
+            code = 0,
+            data = null
+        ).toJsonString()
     }
 
     @GetMapping(path=["/casual/resent10"])
     @ResponseBody
     fun getResent10CasualMatch(
-        @RequestParam playerId : Int,
-    ) : Iterable<CasualGame> = casualGameRepository.findResent10Game(playerId)
+        @RequestParam playerId : Long,
+    ) : String {
+        val history = casualGameRepository.findResent10Game(playerId)
 
+        return ServiceResult.Success(
+            code = 0,
+            data = history
+        ).toJsonString()
+    }
 
     @PostMapping(path=["/rank/create"])
     @ResponseBody
     fun registerRankMatch(
-        @RequestParam player1Id : ULong,
-        @RequestParam player2Id : ULong
-    ) : RankGame? {
-        val player1 = playerRepository.findByIdOrNull("$player1Id") ?: return null
-        val player2 = playerRepository.findByIdOrNull("$player2Id") ?: return null
+        @RequestParam player1Id : Long,
+        @RequestParam player2Id : Long
+    ) : String {
+        val player1 = playerRepository.findByIdOrNull(player1Id)
+            ?: return ServiceResult.Fail(
+                code = -1,
+                message = "p1 정보를 찾을 수 없습니다."
+            ).toJsonString()
 
-        return rankGameRepository.save(
+        val player2 = playerRepository.findByIdOrNull(player2Id)
+            ?: return ServiceResult.Fail(
+                code = -1,
+                message = "p2 정보를 찾을 수 없습니다."
+            ).toJsonString()
+
+        val game = rankGameRepository.save(
             RankGame(
                 gameType = "RANK",
                 player1Id = player1Id,
                 player2Id = player2Id,
                 player1EstimateWinRate = getEstimatedWinRate(player1.eloScore, player2.eloScore),
-                player2EstimateWinRate = getEstimatedWinRate(player2.eloScore, player1.eloScore)
+                player2EstimateWinRate = getEstimatedWinRate(player2.eloScore, player1.eloScore),
+                player1WinCount = player1.rankWinCount,
+                player2WinCount = player2.rankWinCount
             )
         )
+
+        return ServiceResult.Success(
+            code = 0,
+            data = game
+        ).toJsonString()
     }
 
     @PostMapping(path=["/rank/score"])
     @ResponseBody
     fun registerRankMatchScore(
-        @RequestParam gameId : Int,
+        @RequestParam gameId : Long,
         @RequestParam player1WinCount : Int,
         @RequestParam player2WinCount : Int
-    ) : PostResponse {
+    ) : String {
         val game = rankGameRepository.findByIdOrNull(gameId)?.let { g ->
             g.player1WinCount = player1WinCount
             g.player2WinCount = player2WinCount
 
             if (g.player1EstimateWinRate == null || g.player2EstimateWinRate == null) {
-                return PostResponse(500, "매치 정보가 잘못되었습니다.")
+                return ServiceResult.Fail(
+                    code = -1,
+                    message = "매치 정보가 잘못되었습니다."
+                ).toJsonString()
             }
 
             rankGameRepository.save(g)
-        } ?: return PostResponse(404, "매치를 찾을 수 없습니다.")
+        } ?: return ServiceResult.Fail(
+            code = -1,
+            message = "매치를 찾을 수 없습니다."
+        ).toJsonString()
 
-        val player1 = playerRepository.findByIdOrNull("${game.player1Id}") ?: return PostResponse(404, "플레이어를 찾을 수 없습니다.")
-        val player2 = playerRepository.findByIdOrNull("${game.player2Id}") ?: return PostResponse(404, "플레이어를 찾을 수 없습니다.")
+        val player1 = playerRepository.findByIdOrNull(game.player1Id)
+            ?: return ServiceResult.Fail(
+                code = -1, message = "p1 정보를 찾을 수 없습니다."
+            ).toJsonString()
+
+        val player2 = playerRepository.findByIdOrNull(game.player2Id)
+            ?: return ServiceResult.Fail(
+                code = -1,
+                message = "p2 정보를 찾을 수 없습니다."
+            ).toJsonString()
 
         player1.eloScore = getEloScore(
             currentScore = player1.eloScore,
@@ -124,14 +184,31 @@ class GameController {
 
         playerRepository.saveAll(listOf(player1, player2))
 
-        return PostResponse(200, "정상 저장되었습니다.")
+        return ServiceResult.Success(
+            code = 0,
+            data = null
+        ).toJsonString()
     }
 
     @GetMapping(path=["/rank/resent10"])
     @ResponseBody
     fun getResent10RankMatch(
-        @RequestParam playerId : Int,
-    ) : Iterable<RankGame> = rankGameRepository.findResent10Game(playerId)
+        @RequestParam playerId : Long,
+    ) : String {
+        val history = rankGameRepository.findResent10Game(playerId)
+
+        if (history.isEmpty()) {
+            return ServiceResult.Fail(
+                code = -1,
+                message = "검색 결과가 없습니다."
+            ).toJsonString()
+        }
+
+        return ServiceResult.Success(
+            code = 0,
+            data = history
+        ).toJsonString()
+    }
 
 
     private fun getEstimatedWinRate(

@@ -1,12 +1,11 @@
 package supa.dupa.mysqltest.controller
 
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import supa.dupa.mysqltest.entities.Player
+import supa.dupa.mysqltest.entities.ServiceResult
 import supa.dupa.mysqltest.repo.PlayerRepository
 
 
@@ -20,24 +19,52 @@ class PlayerController {
     @PostMapping(path=["/register"])
     @ResponseBody
     fun registerUser(
-        @RequestParam name : String,
-        @RequestParam grade : Int = 0
-    ) : Player {
-        val user = Player(
-            name = name,
-            grade = grade
+        @RequestParam(name = "id") id : Long,
+        @RequestParam(name = "playerName") name : String
+    ) : String {
+        val saveResult = playerRepository.save(
+            Player(
+                id = id,
+                name = name.ifBlank { "익명의 결투가" }
+            )
         )
 
-        return playerRepository.save(user)
+        return ServiceResult.Success(
+            code = 0,
+            data = saveResult
+        ).toJsonString()
+    }
+
+    @GetMapping(path=["/info"])
+    @ResponseBody
+    fun getPlayer(
+        @RequestParam id : Long
+    ) : String {
+        val player = playerRepository.findByIdOrNull(id)
+            ?: return ServiceResult.Fail(
+                code = -1,
+                message = "플레이어 검색에 실패했습니다."
+            ).toJsonString()
+
+        return ServiceResult.Success(
+            code = 0,
+            data = player
+        ).toJsonString()
     }
 
     @GetMapping(path=["/all"])
     @ResponseBody
-    fun getAllUsers() = Json.encodeToString(playerRepository.findAll())
+    fun getAllPlayers() : String {
+        val searchResult = playerRepository.findAll()
 
-    @GetMapping(path=["/{id}"])
-    @ResponseBody
-    fun getUser(
-        @PathVariable id : String
-    ) = Json.encodeToString(playerRepository.findByIdOrNull(id))
+        val playerList = mutableListOf<Player>()
+        searchResult.forEach { p ->
+            playerList.add(p)
+        }
+
+        return ServiceResult.Success(
+            code = 0,
+            data = playerList as List<Player>
+        ).toJsonString()
+    }
 }

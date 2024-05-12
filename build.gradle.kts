@@ -3,10 +3,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
 	id("org.springframework.boot") version "3.1.3"
 	id("io.spring.dependency-management") version "1.1.3"
-	kotlin("jvm") version "1.8.22"
-	kotlin("plugin.spring") version "1.8.22"
-	kotlin("plugin.jpa") version "1.8.22"
-	kotlin("plugin.serialization") version "1.8.22"
+	kotlin("jvm") version "1.9.22"
+	kotlin("plugin.spring") version "1.9.22"
+	kotlin("plugin.jpa") version "1.9.22"
 }
 
 group = "supa.dupa"
@@ -21,11 +20,11 @@ repositories {
 }
 
 dependencies {
-	implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
+	implementation("com.google.code.gson:gson:2.10.1")
 	runtimeOnly("com.mysql:mysql-connector-j")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
