@@ -1,18 +1,30 @@
 package supa.dupa.mysqltest.entities
 
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
+import jakarta.persistence.Index
+import jakarta.persistence.Table
 
-@Entity
+@Entity(name = "tb_player")
+@Table(indexes = [Index(name = "idx_elo_score", columnList = "elo_score")])
 data class Player(
     @Id
     var id : Long,
+
+    @Column(name = "name")
     var name : String,
-    var grade : Int = 0,
-    var casualWinCount : Int = 0,
-    var casualLoseCount : Int = 0,
-    var rankWinCount : Int = 0,
-    var rankLoseCount : Int = 0,
-    var afkCount : Int = 0,
+
+    @Column(name = "elo_score")
     var eloScore : Double = 1000.0,
+)
+
+data class PlayerDTO(
+    val id : Long,
+    val name : String,
+    val casualWinCount : Int,
+    val casualLoseCount : Int,
+    val rankWinCount : Int,
+    val rankLoseCount : Int,
+    val eloScore : Int
 )

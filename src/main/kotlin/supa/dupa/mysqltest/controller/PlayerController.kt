@@ -5,8 +5,12 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import supa.dupa.mysqltest.entities.Player
+import supa.dupa.mysqltest.entities.PlayerDTO
 import supa.dupa.mysqltest.entities.ServiceResult
+import supa.dupa.mysqltest.repo.CasualGameRepository
 import supa.dupa.mysqltest.repo.PlayerRepository
+import supa.dupa.mysqltest.repo.RankGameRepository
+import kotlin.math.roundToInt
 
 
 @Controller
@@ -15,6 +19,13 @@ class PlayerController {
 
     @Autowired
     private lateinit var playerRepository : PlayerRepository
+
+    @Autowired
+    private lateinit var casualGameRepository : CasualGameRepository
+
+    @Autowired
+    private lateinit var rankGameRepository : RankGameRepository
+
 
     @PostMapping(path=["/register"])
     @ResponseBody
@@ -36,9 +47,19 @@ class PlayerController {
             )
         )
 
+        val playerDto = PlayerDTO(
+            id = saveResult.id,
+            name = saveResult.name,
+            casualWinCount = 0,
+            casualLoseCount = 0,
+            rankWinCount = 0,
+            rankLoseCount = 0,
+            eloScore = saveResult.eloScore.roundToInt()
+        )
+
         return ServiceResult.Success(
             code = 0,
-            data = saveResult
+            data = playerDto
         ).toJsonString()
     }
 
@@ -56,6 +77,36 @@ class PlayerController {
         return ServiceResult.Success(
             code = 0,
             data = player
+        ).toJsonString()
+    }
+
+    @GetMapping(path=["/profile"])
+    @ResponseBody
+    fun getProfile(
+        @RequestParam id : Long
+    ) : String {
+        val player = playerRepository.findByIdOrNull(id)
+            ?: return ServiceResult.Fail(
+                code = -1,
+                message = "플레이어 검색에 실패했습니다."
+            ).toJsonString()
+
+        val casualGames = casualGameRepository.findAllGame(player.id)
+        val rankGames = rankGameRepository.findAllGame(player.id)
+
+        val playerDto = PlayerDTO(
+            id = player.id,
+            name = player.name,
+            casualWinCount = casualGames.count { if (it.player1Id == player.id) { it.player1WinCount > it.player2WinCount } else { it.player1WinCount < it.player2WinCount } },
+            casualLoseCount = casualGames.count { if (it.player1Id == player.id) { it.player1WinCount < it.player2WinCount } else { it.player1WinCount > it.player2WinCount } },
+            rankWinCount = rankGames.count { if (it.player1Id == player.id) { it.player1WinCount > it.player2WinCount } else { it.player1WinCount < it.player2WinCount } },
+            rankLoseCount = rankGames.count { if (it.player1Id == player.id) { it.player1WinCount < it.player2WinCount } else { it.player1WinCount > it.player2WinCount } },
+            eloScore = player.eloScore.roundToInt()
+        )
+
+        return ServiceResult.Success(
+            code = 0,
+            data = playerDto
         ).toJsonString()
     }
 

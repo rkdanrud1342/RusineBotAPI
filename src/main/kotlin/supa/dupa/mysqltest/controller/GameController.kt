@@ -12,7 +12,6 @@ import supa.dupa.mysqltest.entities.*
 import supa.dupa.mysqltest.repo.CasualGameRepository
 import supa.dupa.mysqltest.repo.RankGameRepository
 import supa.dupa.mysqltest.repo.PlayerRepository
-import kotlin.math.abs
 import kotlin.math.pow
 
 @Controller
@@ -49,15 +48,26 @@ class GameController {
         val game = casualGameRepository.save(
             CasualGame(
                 player1Id = player1.id,
-                player2Id = player2.id,
-                player1WinCount = player1.casualWinCount,
-                player2WinCount = player2.casualWinCount
+                player2Id = player2.id
             )
+        )
+
+        if (game.id == null) {
+            return ServiceResult.Fail(
+                code = -1,
+                message = "게임 저장에 실패했습니다."
+            ).toJsonString()
+        }
+
+        val gameDto = CasualGameDTO(
+            game.id,
+            player1,
+            player2
         )
 
         return ServiceResult.Success(
             code = 0,
-            data = game
+            data = gameDto
         ).toJsonString()
     }
 
@@ -99,7 +109,7 @@ class GameController {
 
     @PostMapping(path=["/rank/create"])
     @ResponseBody
-    fun registerRankMatch(
+    fun createRankMatch(
         @RequestParam player1Id : Long,
         @RequestParam player2Id : Long
     ) : String {
@@ -117,19 +127,31 @@ class GameController {
 
         val game = rankGameRepository.save(
             RankGame(
-                gameType = "RANK",
                 player1Id = player1Id,
                 player2Id = player2Id,
                 player1EstimateWinRate = getEstimatedWinRate(player1.eloScore, player2.eloScore),
                 player2EstimateWinRate = getEstimatedWinRate(player2.eloScore, player1.eloScore),
-                player1WinCount = player1.rankWinCount,
-                player2WinCount = player2.rankWinCount
             )
+        )
+
+        if (game.id == null) {
+            return ServiceResult.Fail(
+                code = -1,
+                message = "게임 저장에 실패했습니다."
+            ).toJsonString()
+        }
+
+        val gameDto = RankGameDTO(
+            id = game.id,
+            player1 = player1,
+            player2 = player2,
+            player1EstimateWinRate = game.player1EstimateWinRate,
+            player2EstimateWinRate = game.player2EstimateWinRate,
         )
 
         return ServiceResult.Success(
             code = 0,
-            data = game
+            data = gameDto
         ).toJsonString()
     }
 
@@ -143,13 +165,6 @@ class GameController {
         val game = rankGameRepository.findByIdOrNull(gameId)?.let { g ->
             g.player1WinCount = player1WinCount
             g.player2WinCount = player2WinCount
-
-            if (g.player1EstimateWinRate == null || g.player2EstimateWinRate == null) {
-                return ServiceResult.Fail(
-                    code = -1,
-                    message = "매치 정보가 잘못되었습니다."
-                ).toJsonString()
-            }
 
             rankGameRepository.save(g)
         } ?: return ServiceResult.Fail(
@@ -168,16 +183,14 @@ class GameController {
                 message = "p2 정보를 찾을 수 없습니다."
             ).toJsonString()
 
-        player1.eloScore = getEloScore(
-            currentScore = player1.eloScore,
-            estimatedWinRate = game.player1EstimateWinRate!!,
+        player1.updateEloScore(
+            estimatedWinRate = game.player1EstimateWinRate,
             myWinCount = player1WinCount,
             opWinCount = player2WinCount,
         )
 
-        player2.eloScore = getEloScore(
-            currentScore = player2.eloScore,
-            estimatedWinRate = game.player2EstimateWinRate!!,
+        player2.updateEloScore(
+            estimatedWinRate = game.player2EstimateWinRate,
             myWinCount = player2WinCount,
             opWinCount = player1WinCount
         )
@@ -214,19 +227,13 @@ class GameController {
     private fun getEstimatedWinRate(
         myScore : Double,
         opScore : Double
-    ) : Double = 100.0 / (10.0.pow((opScore - myScore) / 800.0) + 1)
+    ) : Double = 1.0 / (10.0.pow((opScore - myScore) / 125.0) + 1)
 
-    private fun getEloScore(
-        currentScore : Double,
+    private fun Player.updateEloScore(
         estimatedWinRate : Double,
         myWinCount : Int,
         opWinCount : Int
-    ) : Double {
-        val w = if (myWinCount > opWinCount) 1 else 0
-        val k = 20
-
-        val additionalScore = abs(myWinCount - opWinCount) * (w - estimatedWinRate) * k
-
-        return currentScore + additionalScore
+    ) {
+        this.eloScore += ((2 * (1 - estimatedWinRate)) * myWinCount) + ((2 * (0 - estimatedWinRate)) * opWinCount)
     }
 }

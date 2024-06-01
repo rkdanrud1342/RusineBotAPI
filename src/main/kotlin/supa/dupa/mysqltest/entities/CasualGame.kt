@@ -1,19 +1,31 @@
 package supa.dupa.mysqltest.entities
 
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
+import jakarta.persistence.*
 
-@Entity
+@Entity(name = "tb_casual_game")
+@Table(indexes = [Index(columnList = "player1_id"), Index(columnList = "player2_id")])
 data class CasualGame(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    var id : Long? = null,
+    val id : Long? = null,
 
-    var player1Id : Long,
-    var player2Id : Long,
+    @Column(name = "player1_id")
+    val player1Id : Long,
+    @Column(name = "player2_id")
+    val player2Id : Long,
 
+    @Column(name = "player1_win_count")
     var player1WinCount : Int = 0,
-    var player2WinCount : Int = 0
+    @Column(name = "player2_win_count")
+    var player2WinCount : Int = 0,
+)
+
+data class CasualGameDTO(
+    val id : Long,
+
+    val player1 : Player,
+    val player2 : Player,
+
+    val player1WinCount : Int = 0,
+    val player2WinCount : Int = 0
 )

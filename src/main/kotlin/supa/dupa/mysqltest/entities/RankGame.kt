@@ -2,20 +2,38 @@ package supa.dupa.mysqltest.entities
 
 import jakarta.persistence.*
 
-@Entity
+@Entity(name = "tb_rank_game")
+@Table(indexes = [Index(columnList = "player1_id"), Index(columnList = "player2_id")])
 data class RankGame(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    var id : Long? = null,
+    val id : Long? = null,
 
-    var gameType : String,
+    @Column(name = "player1_id")
+    val player1Id : Long,
+    @Column(name = "player2_id")
+    val player2Id : Long,
 
-    var player1Id : Long,
-    var player2Id : Long,
+    @Column(name = "player1_estimate_win_rate")
+    val player1EstimateWinRate : Double,
+    @Column(name = "player2_estimate_win_rate")
+    val player2EstimateWinRate : Double,
 
-    var player1EstimateWinRate : Double? = null,
-    var player2EstimateWinRate : Double? = null,
-
+    @Column(name = "player1_win_count")
     var player1WinCount : Int = 0,
+    @Column(name = "player2_win_count")
     var player2WinCount : Int = 0,
+)
+
+data class RankGameDTO(
+    val id : Long,
+
+    val player1 : Player,
+    val player2 : Player,
+
+    val player1EstimateWinRate : Double?,
+    val player2EstimateWinRate : Double?,
+
+    val player1WinCount : Int = 0,
+    val player2WinCount : Int = 0
 )
