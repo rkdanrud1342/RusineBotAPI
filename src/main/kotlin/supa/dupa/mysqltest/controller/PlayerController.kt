@@ -31,7 +31,8 @@ class PlayerController {
     @ResponseBody
     fun registerUser(
         @RequestParam(name = "id") id : Long,
-        @RequestParam(name = "playerName") name : String
+        @RequestParam(name = "playerName") name : String,
+        @RequestParam(name = "grade") grade : Int
     ) : String {
         if (playerRepository.findByIdOrNull(id) != null) {
             return ServiceResult.Fail(
@@ -43,7 +44,8 @@ class PlayerController {
         val saveResult = playerRepository.save(
             Player(
                 id = id,
-                name = name.ifBlank { "익명의 결투가" }
+                name = name.ifBlank { "익명의 결투가" },
+                eloScore = (115 + 77 * grade).toDouble()
             )
         )
 

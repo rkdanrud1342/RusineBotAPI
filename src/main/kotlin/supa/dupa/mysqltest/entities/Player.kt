@@ -16,7 +16,7 @@ data class Player(
     var name : String,
 
     @Column(name = "elo_score")
-    var eloScore : Double = 1000.0,
+    var eloScore : Double,
 )
 
 data class PlayerDTO(
