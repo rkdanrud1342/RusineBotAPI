@@ -78,7 +78,7 @@ class GameController {
         @RequestParam player1WinCount : Int,
         @RequestParam player2WinCount : Int
     ) : String {
-        casualGameRepository.findByIdOrNull(gameId)?.let { g ->
+        val game = casualGameRepository.findByIdOrNull(gameId)?.let { g ->
             g.player1WinCount = player1WinCount
             g.player2WinCount = player2WinCount
 
@@ -88,9 +88,35 @@ class GameController {
             message = "매치를 찾을 수 없습니다."
         ).toJsonString()
 
+        if (game.id == null) {
+            return ServiceResult.Fail(
+                code = -1,
+                message = "게임 저장에 실패했습니다."
+            ).toJsonString()
+        }
+
+        val player1 = playerRepository.findByIdOrNull(game.player1Id)
+            ?: return ServiceResult.Fail(
+                code = -1, message = "p1 정보를 찾을 수 없습니다."
+            ).toJsonString()
+
+        val player2 = playerRepository.findByIdOrNull(game.player2Id)
+            ?: return ServiceResult.Fail(
+                code = -1,
+                message = "p2 정보를 찾을 수 없습니다."
+            ).toJsonString()
+
+        val gameDto = CasualGameDTO(
+            game.id,
+            player1,
+            player2,
+            game.player1WinCount,
+            game.player2WinCount
+        )
+
         return ServiceResult.Success(
             code = 0,
-            data = null
+            data = gameDto
         ).toJsonString()
     }
 
@@ -172,6 +198,13 @@ class GameController {
             message = "매치를 찾을 수 없습니다."
         ).toJsonString()
 
+        if (game.id == null) {
+            return ServiceResult.Fail(
+                code = -1,
+                message = "게임 저장에 실패했습니다."
+            ).toJsonString()
+        }
+
         val player1 = playerRepository.findByIdOrNull(game.player1Id)
             ?: return ServiceResult.Fail(
                 code = -1, message = "p1 정보를 찾을 수 없습니다."
@@ -197,9 +230,19 @@ class GameController {
 
         playerRepository.saveAll(listOf(player1, player2))
 
+        val gameDto = RankGameDTO(
+            game.id,
+            player1,
+            player2,
+            game.player1EstimateWinRate,
+            game.player2EstimateWinRate,
+            game.player1WinCount,
+            game.player2WinCount
+        )
+
         return ServiceResult.Success(
             code = 0,
-            data = null
+            data = gameDto
         ).toJsonString()
     }
 
