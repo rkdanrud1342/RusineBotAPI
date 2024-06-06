@@ -28,5 +28,5 @@ data class RunningGameDTO(
     val player1EstimateWinRate : Double?,
     val player2EstimateWinRate : Double?,
 
-    val gameType : String
+    val gameTypeCode : Int
 ) : GameDTO

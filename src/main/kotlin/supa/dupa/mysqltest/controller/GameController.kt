@@ -34,11 +34,11 @@ class GameController {
     @PostMapping(path = ["/create"])
     @ResponseBody
     fun createGame(
-        @RequestParam type : String,
-        @RequestParam player1Id : Long,
-        @RequestParam player2Id : Long
+        @RequestParam(name = "typeCode") typeCode : Int,
+        @RequestParam(name = "player1Id") player1Id : Long,
+        @RequestParam(name = "player2Id") player2Id : Long
     ) : String {
-        val gameType = GameType.entries.find { it.name == type }
+        val gameType = GameType.entries.find { it.typeCode == typeCode }
             ?: return ServiceResult.Fail(
                 code = -1,
                 message = "매치 타입이 잘못되었습니다."
@@ -62,7 +62,7 @@ class GameController {
                 player2Id = player2Id,
                 player1EstimateWinRate = getEstimatedWinRate(player1.eloScore, player2.eloScore),
                 player2EstimateWinRate = getEstimatedWinRate(player2.eloScore, player1.eloScore),
-                gameType = gameType.name
+                gameTypeCode = gameType.typeCode
             )
         )
 
@@ -79,7 +79,7 @@ class GameController {
             player2 = player2,
             player1EstimateWinRate = game.player1EstimateWinRate,
             player2EstimateWinRate = game.player2EstimateWinRate,
-            gameType = game.gameType
+            gameTypeCode = game.gameTypeCode
         )
 
         return ServiceResult.Success(
@@ -128,7 +128,7 @@ class GameController {
             player2 = player2,
             player1EstimateWinRate = game.player1EstimateWinRate,
             player2EstimateWinRate = game.player2EstimateWinRate,
-            gameType = game.gameType
+            gameTypeCode = game.gameTypeCode
         )
 
         return ServiceResult.Success(
@@ -156,9 +156,9 @@ class GameController {
             message = "매치를 찾을 수 없습니다."
         ).toJsonString()
 
-        return when (game.gameType) {
-            GameType.RANK.name -> registerRankMatchScore(game, player1WinCount, player2WinCount)
-            GameType.CASUAL.name -> registerCasualMatchScore(game, player1WinCount, player2WinCount)
+        return when (game.gameTypeCode) {
+            GameType.RANK.typeCode -> registerRankMatchScore(game, player1WinCount, player2WinCount)
+            GameType.CASUAL.typeCode -> registerCasualMatchScore(game, player1WinCount, player2WinCount)
             else -> ServiceResult.Fail(code = -1, message = "게임 타입이 잘못되었습니다.").toJsonString()
         }
     }

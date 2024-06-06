@@ -20,5 +20,5 @@ data class RunningGame(
     val player2EstimateWinRate : Double,
 
     @Column(name = "game_type")
-    val gameType : String,
+    val gameTypeCode : Int,
 )
