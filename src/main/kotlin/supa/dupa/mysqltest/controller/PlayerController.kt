@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import supa.dupa.mysqltest.entities.Player
 import supa.dupa.mysqltest.dto.PlayerDTO
+import supa.dupa.mysqltest.dto.PlayerRankDTO
 import supa.dupa.mysqltest.dto.ServiceResult
 import supa.dupa.mysqltest.repo.CasualGameRepository
 import supa.dupa.mysqltest.repo.PlayerRepository
@@ -27,7 +28,7 @@ class PlayerController {
     private lateinit var rankGameRepository : RankGameRepository
 
 
-    @PostMapping(path=["/register"])
+    @PostMapping(path = ["/register"])
     @ResponseBody
     fun registerUser(
         @RequestParam(name = "id") id : Long,
@@ -65,7 +66,7 @@ class PlayerController {
         ).toJsonString()
     }
 
-    @GetMapping(path=["/info"])
+    @GetMapping(path = ["/info"])
     @ResponseBody
     fun getPlayer(
         @RequestParam id : Long
@@ -82,7 +83,7 @@ class PlayerController {
         ).toJsonString()
     }
 
-    @GetMapping(path=["/profile"])
+    @GetMapping(path = ["/profile"])
     @ResponseBody
     fun getProfile(
         @RequestParam id : Long
@@ -99,10 +100,34 @@ class PlayerController {
         val playerDto = PlayerDTO(
             id = player.id,
             name = player.name,
-            casualWinCount = casualGames.count { if (it.player1Id == player.id) { it.player1WinCount > it.player2WinCount } else { it.player1WinCount < it.player2WinCount } },
-            casualLoseCount = casualGames.count { if (it.player1Id == player.id) { it.player1WinCount < it.player2WinCount } else { it.player1WinCount > it.player2WinCount } },
-            rankWinCount = rankGames.count { if (it.player1Id == player.id) { it.player1WinCount > it.player2WinCount } else { it.player1WinCount < it.player2WinCount } },
-            rankLoseCount = rankGames.count { if (it.player1Id == player.id) { it.player1WinCount < it.player2WinCount } else { it.player1WinCount > it.player2WinCount } },
+            casualWinCount = casualGames.count {
+                if (it.player1Id == player.id) {
+                    it.player1WinCount > it.player2WinCount
+                } else {
+                    it.player1WinCount < it.player2WinCount
+                }
+            },
+            casualLoseCount = casualGames.count {
+                if (it.player1Id == player.id) {
+                    it.player1WinCount < it.player2WinCount
+                } else {
+                    it.player1WinCount > it.player2WinCount
+                }
+            },
+            rankWinCount = rankGames.count {
+                if (it.player1Id == player.id) {
+                    it.player1WinCount > it.player2WinCount
+                } else {
+                    it.player1WinCount < it.player2WinCount
+                }
+            },
+            rankLoseCount = rankGames.count {
+                if (it.player1Id == player.id) {
+                    it.player1WinCount < it.player2WinCount
+                } else {
+                    it.player1WinCount > it.player2WinCount
+                }
+            },
             eloScore = player.eloScore.roundToInt()
         )
 
@@ -112,7 +137,32 @@ class PlayerController {
         ).toJsonString()
     }
 
-    @GetMapping(path=["/all"])
+    @GetMapping(path = ["/ranking"])
+    @ResponseBody
+    fun getPlayerRanking(
+        @RequestParam(name = "playerId") id : Long
+    ) : String {
+        val allPlayers = playerRepository.findAll().sortedByDescending { it.eloScore }.withIndex()
+
+        val playerData = allPlayers.find { it.value.id == id }
+            ?: return ServiceResult.Fail(
+                code = -1,
+                message = "플레이어 정보가 없습니다."
+            ).toJsonString()
+
+        val playerRankDto = PlayerRankDTO(
+            top10 = allPlayers.take(10).map { it.value },
+            player = playerData.value,
+            rank = playerData.index
+        )
+
+        return ServiceResult.Success(
+            code = 0,
+            data = playerRankDto,
+        ).toJsonString()
+    }
+
+    @GetMapping(path = ["/all"])
     @ResponseBody
     fun getAllPlayers() : String {
         val searchResult = playerRepository.findAll()
