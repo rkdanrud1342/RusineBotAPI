@@ -5,8 +5,8 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import supa.dupa.mysqltest.entities.Player
-import supa.dupa.mysqltest.entities.PlayerDTO
-import supa.dupa.mysqltest.entities.ServiceResult
+import supa.dupa.mysqltest.dto.PlayerDTO
+import supa.dupa.mysqltest.dto.ServiceResult
 import supa.dupa.mysqltest.repo.CasualGameRepository
 import supa.dupa.mysqltest.repo.PlayerRepository
 import supa.dupa.mysqltest.repo.RankGameRepository

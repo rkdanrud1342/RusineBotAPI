@@ -6,7 +6,6 @@ import jakarta.persistence.*
 @Table(indexes = [Index(columnList = "player1_id"), Index(columnList = "player2_id")])
 data class RankGame(
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     val id : Long? = null,
 
     @Column(name = "player1_id")
@@ -23,17 +22,4 @@ data class RankGame(
     var player1WinCount : Int = 0,
     @Column(name = "player2_win_count")
     var player2WinCount : Int = 0,
-)
-
-data class RankGameDTO(
-    val id : Long,
-
-    val player1 : Player,
-    val player2 : Player,
-
-    val player1EstimateWinRate : Double?,
-    val player2EstimateWinRate : Double?,
-
-    val player1WinCount : Int = 0,
-    val player2WinCount : Int = 0
 )

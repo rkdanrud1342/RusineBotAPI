@@ -1,4 +1,4 @@
-package supa.dupa.mysqltest.entities
+package supa.dupa.mysqltest.dto
 
 import com.google.gson.Gson
 
