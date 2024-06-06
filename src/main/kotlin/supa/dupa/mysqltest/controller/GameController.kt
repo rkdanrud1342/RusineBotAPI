@@ -144,6 +144,13 @@ class GameController {
         @RequestParam player1WinCount : Int,
         @RequestParam player2WinCount : Int
     ) : String {
+        if (player1WinCount == player2WinCount) {
+            return ServiceResult.Fail(
+                code = -1,
+                message = "비기는 경우가 없어야합니다."
+            ).toJsonString()
+        }
+
         val game = runningGameRepository.findByPlayerId(playerId) ?: return ServiceResult.Fail(
             code = -1,
             message = "매치를 찾을 수 없습니다."
