@@ -137,6 +137,60 @@ class GameController {
         ).toJsonString()
     }
 
+    @PostMapping(path = ["/cancel"])
+    @ResponseBody
+    fun cancelRunningGame(
+        @RequestParam playerId : Long
+    ) : String {
+        val game = runningGameRepository.findByPlayerId(playerId)
+            ?: return ServiceResult.Success(
+                code = 0,
+                message = "진행중인 게임이 없습니다.",
+                data = null
+            ).toJsonString()
+
+        if (game.id == null) {
+            runningGameRepository.delete(game)
+
+            return ServiceResult.Success(
+                code = 0,
+                message = "진행중인 게임이 없습니다.",
+                data = null
+            ).toJsonString()
+        }
+
+        val player1 = playerRepository.findByIdOrNull(game.player1Id)
+            ?: return ServiceResult.Fail(
+                code = -1,
+                message = "p1 정보를 찾을 수 없습니다."
+            ).toJsonString()
+
+        val player2 = playerRepository.findByIdOrNull(game.player2Id)
+            ?: return ServiceResult.Fail(
+                code = -1,
+                message = "p2 정보를 찾을 수 없습니다."
+            ).toJsonString()
+
+        val gameResultDTO = GameResultDTO(
+            gameType = GameType.typeCodeOf(game.gameTypeCode),
+            player1Name = player1.name,
+            player1WinCount = 0,
+            player1EloScore = player1.eloScore.roundToInt(),
+            player1EloScoreChange = 0,
+            player2Name = player2.name,
+            player2WinCount = 0,
+            player2EloScore = player2.eloScore.roundToInt(),
+            player2EloScoreChange = 0
+        )
+
+        runningGameRepository.delete(game)
+
+        return ServiceResult.Success(
+            code = 0,
+            data = gameResultDTO
+        ).toJsonString()
+    }
+
     @PostMapping(path = ["/score"])
     @ResponseBody
     fun registerMatchScore(
