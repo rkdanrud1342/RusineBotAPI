@@ -38,7 +38,7 @@ class PlayerController {
         if (playerRepository.findByIdOrNull(id) != null) {
             return ServiceResult.Fail(
                 code = -1,
-                message = "이미 프로필이 있어요."
+                message = "이미 프로필이 있는뎁쇼?"
             ).toJsonString()
         }
 
@@ -74,7 +74,7 @@ class PlayerController {
         val player = playerRepository.findByIdOrNull(id)
             ?: return ServiceResult.Fail(
                 code = -1,
-                message = "플레이어 검색에 실패했습니다."
+                message = "선수 검색에 실패했습니다."
             ).toJsonString()
 
         return ServiceResult.Success(

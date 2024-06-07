@@ -96,7 +96,7 @@ class GameController {
         val game = runningGameRepository.findByPlayerId(playerId)
             ?: return ServiceResult.Success(
                 code = 0,
-                message = "진행중인 게임이 없습니다.",
+                message = "현재 진행중인 대전이 없습니다",
                 data = null
             ).toJsonString()
 
@@ -105,7 +105,7 @@ class GameController {
 
             return ServiceResult.Success(
                 code = 0,
-                message = "진행중인 게임이 없습니다.",
+                message = "현재 진행중인 대전이 없습니다.",
                 data = null
             ).toJsonString()
         }
@@ -145,7 +145,7 @@ class GameController {
         val game = runningGameRepository.findByPlayerId(playerId)
             ?: return ServiceResult.Success(
                 code = 0,
-                message = "진행중인 게임이 없습니다.",
+                message = "현재 진행중인 대전이 없습니다",
                 data = null
             ).toJsonString()
 
@@ -154,7 +154,7 @@ class GameController {
 
             return ServiceResult.Success(
                 code = 0,
-                message = "진행중인 게임이 없습니다.",
+                message = "현재 진행중인 대전이 없습니다.",
                 data = null
             ).toJsonString()
         }
