@@ -366,7 +366,7 @@ class GameController {
         runningGameRepository.delete(game)
 
         val gameResultDto = GameResultDTO(
-            gameType = GameType.RANK,
+            gameType = GameType.CASUAL,
 
             player1Name = player1.name,
             player1WinCount = player1WinCount,
