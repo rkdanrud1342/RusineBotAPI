@@ -255,6 +255,13 @@ class GameController {
         player1WinCount : Int,
         player2WinCount : Int
     ) : String {
+        if (player1WinCount > 5 || player2WinCount > 5) {
+            return ServiceResult.Fail(
+                code = -1,
+                message = "랭크게임은 5선승으로 진행되어야 합니다."
+            ).toJsonString()
+        }
+
         val rankGame = RankGame(
             id = game.id,
             player1Id = game.player1Id,
