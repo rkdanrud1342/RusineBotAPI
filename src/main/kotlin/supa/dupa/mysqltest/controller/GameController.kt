@@ -395,13 +395,13 @@ class GameController {
     private fun getEstimatedWinRate(
         myScore : Double,
         opScore : Double
-    ) : Double = 1.0 / (10.0.pow((opScore - myScore) / 1250.0) + 1)
+    ) : Double = 1.0 / (10.0.pow((opScore - myScore) / 625.0) + 1)
 
     private fun Player.updateEloScore(
         estimatedWinRate : Double,
         myWinCount : Int,
         opWinCount : Int
     ) {
-        this.eloScore += ((20 * (1 - estimatedWinRate)) * myWinCount) + ((20 * (0 - estimatedWinRate)) * opWinCount)
+        this.eloScore += ((5 * (1 - estimatedWinRate)) * myWinCount) + ((5 * (0 - estimatedWinRate)) * opWinCount)
     }
 }
