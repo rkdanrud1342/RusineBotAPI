@@ -173,10 +173,14 @@ class GameController {
 
         val gameResultDTO = GameResultDTO(
             gameType = GameType.typeCodeOf(game.gameTypeCode),
+
+            player1Id = player1.id,
             player1Name = player1.name,
             player1WinCount = 0,
             player1EloScore = player1.eloScore.roundToInt(),
             player1EloScoreChange = 0,
+
+            player2Id = player2.id,
             player2Name = player2.name,
             player2WinCount = 0,
             player2EloScore = player2.eloScore.roundToInt(),
@@ -313,11 +317,13 @@ class GameController {
         val gameResultDto = GameResultDTO(
             gameType = GameType.RANK,
 
+            player1Id = player1.id,
             player1Name = player1.name,
             player1WinCount = player1WinCount,
             player1EloScore = player1.eloScore.roundToInt(),
             player1EloScoreChange = player1.eloScore.roundToInt() - oldPlayer1EloScore,
 
+            player2Id = player2.id,
             player2Name = player2.name,
             player2WinCount = player2WinCount,
             player2EloScore = player2.eloScore.roundToInt(),
@@ -375,11 +381,13 @@ class GameController {
         val gameResultDto = GameResultDTO(
             gameType = GameType.CASUAL,
 
+            player1Id = player1.id,
             player1Name = player1.name,
             player1WinCount = player1WinCount,
             player1EloScore = 0,
             player1EloScoreChange = 0,
 
+            player2Id = player2.id,
             player2Name = player2.name,
             player2WinCount = player2WinCount,
             player2EloScore = 0,
