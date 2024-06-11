@@ -46,7 +46,7 @@ class PlayerController {
             Player(
                 id = id,
                 name = name.ifBlank { "익명의 결투가" },
-                eloScore = (1150 + 770 * grade).toDouble()
+                eloScore = (3875 + 250 * grade).toDouble()
             )
         )
 
