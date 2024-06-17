@@ -12,9 +12,9 @@ data class Player(
     @Id
     var id : Long,
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     var name : String,
 
-    @Column(name = "elo_score")
-    var eloScore : Double,
+    @Column(name = "elo_score", nullable = false)
+    var eloScore : Double
 )

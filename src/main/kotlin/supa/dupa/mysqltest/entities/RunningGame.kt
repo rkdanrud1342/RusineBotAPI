@@ -9,16 +9,16 @@ data class RunningGame(
     @GeneratedValue(strategy = GenerationType.AUTO)
     val id : Long? = null,
 
-    @Column(name = "player1_id")
+    @Column(name = "player1_id", nullable = false)
     val player1Id : Long,
-    @Column(name = "player2_id")
+    @Column(name = "player2_id", nullable = false)
     val player2Id : Long,
 
-    @Column(name = "player1_estimate_win_rate")
+    @Column(name = "player1_estimate_win_rate", nullable = false)
     val player1EstimateWinRate : Double,
-    @Column(name = "player2_estimate_win_rate")
+    @Column(name = "player2_estimate_win_rate", nullable = false)
     val player2EstimateWinRate : Double,
 
-    @Column(name = "game_type")
+    @Column(name = "game_type", nullable = false)
     val gameTypeCode : Int,
 )

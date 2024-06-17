@@ -12,6 +12,8 @@ import supa.dupa.mysqltest.repo.CasualGameRepository
 import supa.dupa.mysqltest.repo.PlayerRepository
 import supa.dupa.mysqltest.repo.RankGameRepository
 import supa.dupa.mysqltest.repo.RunningGameRepository
+import java.time.OffsetDateTime
+import java.time.ZoneId
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -184,7 +186,9 @@ class GameController {
             player2Name = player2.name,
             player2WinCount = 0,
             player2EloScore = player2.eloScore.roundToInt(),
-            player2EloScoreChange = 0
+            player2EloScoreChange = 0,
+
+            regDateTime = OffsetDateTime.now(ZoneId.systemDefault()).toLocalDateTime()
         )
 
         runningGameRepository.delete(game)
@@ -221,32 +225,16 @@ class GameController {
         }
     }
 
-    @GetMapping(path = ["/rank/resent10"])
+    @GetMapping(path = ["/resent"])
     @ResponseBody
-    fun getResent10RankMatch(
+    fun getResentMatch(
         @RequestParam playerId : Long,
+        @RequestParam amount : Int
     ) : String {
-        val history = rankGameRepository.findResent10Game(playerId)
-
-        if (history.isEmpty()) {
-            return ServiceResult.Fail(
-                code = -1,
-                message = "검색 결과가 없습니다."
-            ).toJsonString()
-        }
-
-        return ServiceResult.Success(
-            code = 0,
-            data = history
-        ).toJsonString()
-    }
-
-    @GetMapping(path = ["/casual/resent10"])
-    @ResponseBody
-    fun getResent10CasualMatch(
-        @RequestParam playerId : Long,
-    ) : String {
-        val history = casualGameRepository.findResent10Game(playerId)
+        val history = casualGameRepository.findResentGame(playerId, amount)
+            .plus(rankGameRepository.findResentGame(playerId, amount))
+            .sortedByDescending { it.id }
+            .take(amount)
 
         return ServiceResult.Success(
             code = 0,
@@ -329,7 +317,9 @@ class GameController {
             player2Name = player2.name,
             player2WinCount = player2WinCount,
             player2EloScore = player2.eloScore.roundToInt(),
-            player2EloScoreChange = player2.eloScore.roundToInt() - oldPlayer2EloScore
+            player2EloScoreChange = player2.eloScore.roundToInt() - oldPlayer2EloScore,
+
+            regDateTime = saveResult.timestamp.toLocalDateTime()
         )
 
         return ServiceResult.Success(
@@ -393,7 +383,9 @@ class GameController {
             player2Name = player2.name,
             player2WinCount = player2WinCount,
             player2EloScore = 0,
-            player2EloScoreChange = 0
+            player2EloScoreChange = 0,
+
+            regDateTime = saveResult.timestamp.toLocalDateTime()
         )
 
         return ServiceResult.Success(

@@ -7,10 +7,11 @@ import supa.dupa.mysqltest.entities.CasualGame
 
 interface CasualGameRepository : JpaRepository<CasualGame, Long> {
     @Query(
-        value = "SELECT * FROM tb_casual_game g WHERE g.player1_id = :id OR g.player2_id = :id ORDER BY id DESC LIMIT 10",
+        value = "SELECT * FROM tb_casual_game g WHERE g.player1_id = :id OR g.player2_id = :id ORDER BY id DESC LIMIT :amount",
         nativeQuery = true
-    ) fun findResent10Game(
-        @Param("id") id : Long
+    ) fun findResentGame(
+        @Param("id") id : Long,
+        @Param("amount") amount : Int
     ) : List<CasualGame>
 
     @Query(

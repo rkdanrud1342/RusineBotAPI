@@ -7,11 +7,12 @@ import supa.dupa.mysqltest.entities.RankGame
 
 interface RankGameRepository : JpaRepository<RankGame, Long> {
     @Query(
-        value = "SELECT * FROM tb_rank_game WHERE player1_id = :id OR player2_id = :id ORDER BY id DESC LIMIT 10",
+        value = "SELECT * FROM tb_rank_game WHERE player1_id = :id OR player2_id = :id ORDER BY id DESC LIMIT :amount",
         nativeQuery = true
     )
-    fun findResent10Game(
-        @Param("id") id : Long
+    fun findResentGame(
+        @Param("id") id : Long,
+        @Param("amount") amount : Int
     ) : List<RankGame>
 
     @Query(

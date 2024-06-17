@@ -2,6 +2,7 @@ package supa.dupa.mysqltest.dto
 
 import supa.dupa.mysqltest.entities.GameType
 import supa.dupa.mysqltest.entities.Player
+import java.time.LocalDateTime
 
 sealed interface GameDTO
 
@@ -19,6 +20,8 @@ data class GameResultDTO(
     val player2WinCount : Int,
     val player2EloScore : Int,
     val player2EloScoreChange : Int,
+
+    val regDateTime : LocalDateTime
 ) : GameDTO
 
 data class RunningGameDTO(
