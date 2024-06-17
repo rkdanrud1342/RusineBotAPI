@@ -13,9 +13,9 @@ data class RankGame(
     override val id : Long? = null,
 
     @Column(name = "player1_id", nullable = false)
-    val player1Id : Long,
+    override val player1Id : Long,
     @Column(name = "player2_id", nullable = false)
-    val player2Id : Long,
+    override val player2Id : Long,
 
     @Column(name = "player1_estimate_win_rate", nullable = false)
     val player1EstimateWinRate : Double,
@@ -23,9 +23,9 @@ data class RankGame(
     val player2EstimateWinRate : Double,
 
     @Column(name = "player1_win_count", nullable = false)
-    var player1WinCount : Int = 0,
+    override var player1WinCount : Int = 0,
     @Column(name = "player2_win_count", nullable = false)
-    var player2WinCount : Int = 0,
+    override var player2WinCount : Int = 0,
 
     @Column(name = "reg_datetime", nullable = false)
     @ColumnDefault(value = "CURRENT_TIMESTAMP(6)")
