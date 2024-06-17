@@ -259,7 +259,9 @@ class GameController {
         player1WinCount : Int,
         player2WinCount : Int
     ) : String {
-        if (player1WinCount > 5 || player2WinCount > 5) {
+        val isFt5 = (player1WinCount == 5 && player1WinCount > player2WinCount) || (player2WinCount == 5 && player2WinCount > player1WinCount)
+
+        if (!isFt5) {
             return ServiceResult.Fail(
                 code = -1,
                 message = "랭크게임은 5선승으로 진행되어야 합니다."
