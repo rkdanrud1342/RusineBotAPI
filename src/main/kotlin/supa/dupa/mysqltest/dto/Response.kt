@@ -1,10 +1,16 @@
 package supa.dupa.mysqltest.dto
 
-import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import supa.dupa.mysqltest.serialization.LocalDateTimeDeserializer
+import supa.dupa.mysqltest.serialization.LocalDateTimeSerializer
+import java.time.LocalDateTime
 
 sealed class ServiceResult<out T : Any> {
     companion object {
-        private val gson = Gson()
+        private val gson = GsonBuilder()
+            .registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeSerializer())
+            .registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeDeserializer())
+            .create()
     }
 
     abstract val code : Int
