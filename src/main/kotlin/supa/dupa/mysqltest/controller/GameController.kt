@@ -81,7 +81,7 @@ class GameController {
             player2 = player2,
             player1EstimateWinRate = game.player1EstimateWinRate,
             player2EstimateWinRate = game.player2EstimateWinRate,
-            gameTypeCode = game.gameTypeCode
+            gameType = GameType.typeCodeOf(game.gameTypeCode)
         )
 
         return ServiceResult.Success(
@@ -130,7 +130,7 @@ class GameController {
             player2 = player2,
             player1EstimateWinRate = game.player1EstimateWinRate,
             player2EstimateWinRate = game.player2EstimateWinRate,
-            gameTypeCode = game.gameTypeCode
+            gameType = GameType.typeCodeOf(game.gameTypeCode)
         )
 
         return ServiceResult.Success(
