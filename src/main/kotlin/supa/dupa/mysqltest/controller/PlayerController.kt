@@ -177,4 +177,65 @@ class PlayerController {
             data = playerList as List<Player>
         ).toJsonString()
     }
+
+    @PostMapping(path = ["/grade"])
+    @ResponseBody
+    fun setGrade(
+        @RequestParam(name = "playerId") id : Long,
+        @RequestParam(name = "grade") grade : Int
+    ) : String {
+        val player = playerRepository.findByIdOrNull(id)
+            ?: return ServiceResult.Fail(
+                code = -1,
+                message = "프로필이 없습니다."
+            ).toJsonString()
+
+        val saveResult = playerRepository.save(
+            player.apply {
+                this.eloScore = (3875 + 250 * grade).toDouble()
+            }
+        )
+
+        val casualGames = casualGameRepository.findAllGame(player.id)
+        val rankGames = rankGameRepository.findAllGame(player.id)
+
+        val playerDto = PlayerDTO(
+            id = saveResult.id,
+            name = saveResult.name,
+            casualWinCount = casualGames.count {
+                if (it.player1Id == player.id) {
+                    it.player1WinCount > it.player2WinCount
+                } else {
+                    it.player1WinCount < it.player2WinCount
+                }
+            },
+            casualLoseCount = casualGames.count {
+                if (it.player1Id == player.id) {
+                    it.player1WinCount < it.player2WinCount
+                } else {
+                    it.player1WinCount > it.player2WinCount
+                }
+            },
+            rankWinCount = rankGames.count {
+                if (it.player1Id == player.id) {
+                    it.player1WinCount > it.player2WinCount
+                } else {
+                    it.player1WinCount < it.player2WinCount
+                }
+            },
+            rankLoseCount = rankGames.count {
+                if (it.player1Id == player.id) {
+                    it.player1WinCount < it.player2WinCount
+                } else {
+                    it.player1WinCount > it.player2WinCount
+                }
+            },
+            eloScore = saveResult.eloScore.roundToInt()
+        )
+
+        return ServiceResult.Success(
+            code = 0,
+            data = playerDto
+        ).toJsonString()
+    }
 }
