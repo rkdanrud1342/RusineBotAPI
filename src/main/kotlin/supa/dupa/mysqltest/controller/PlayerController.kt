@@ -238,4 +238,24 @@ class PlayerController {
             data = playerDto
         ).toJsonString()
     }
+
+    @DeleteMapping(path = ["/profile"])
+    @ResponseBody
+    fun deletePlayer(
+        @RequestHeader(name = "playerId") id : Long
+    ) : String {
+        val player = playerRepository.findByIdOrNull(id)
+            ?: return ServiceResult.Fail(
+                code = -1,
+                message = "프로필이 없습니다."
+            ).toJsonString()
+
+        playerRepository.delete(player)
+
+        return ServiceResult.Success(
+            code = 0,
+            message = "프로필을 삭제했습니다.",
+            data = null
+        ).toJsonString()
+    }
 }
